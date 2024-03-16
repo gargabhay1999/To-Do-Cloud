@@ -4,15 +4,16 @@ from bson.objectid import ObjectId # For ObjectId to work
 from bson.errors import InvalidId # For catching InvalidId exception for ObjectId
 import os
 
-mongodb_host = os.environ.get('MONGO_HOST', 'localhost')
-mongodb_port = int(os.environ.get('MONGO_PORT', '27017'))
-client = MongoClient(mongodb_host, mongodb_port)    #Configure the connection to the database
-db = client.camp2016    #Select the database
+# mongodb_host = os.environ.get('MONGO_HOST', 'mongo')
+# mongodb_port = int(os.environ.get('MONGO_PORT', '27017'))
+mongodb_uri = os.environ.get('MONGO_URI', 'localhost')
+client = MongoClient(mongodb_uri) #Configure the connection to the database
+db = client.todo_app_db #Select the database
 todos = db.todo #Select the collection
 
 app = Flask(__name__)
-title = "TODO with Flask"
-heading = "ToDo Reminder"
+title = "Yout TaskList"
+heading = "Task List"
 #modify=ObjectId()
 
 def redirect_url():
