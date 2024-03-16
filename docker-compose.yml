@@ -2,9 +2,26 @@ version: '3.4'
 
 services:
   todocloud:
-    image: todocloud
+    image: mytodoflask:latest
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./app/
+      dockerfile: Dockerfile
     ports:
-      - 5000:5000
+      - "5000:5000"
+    volumes:
+      - ./app:/app
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/todo_app_db  # Connection URI to MongoDB, mongo is the name of service
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+    driver: local
