@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   todocloud:
-    image: mytodoflask:latest
+    image: mayankramnani/mytodoflask:latest
     build:
       context: ./app/
       dockerfile: Dockerfile

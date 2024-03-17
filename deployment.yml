@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: mytodo-app
-          image: ag9489/mytodoflask:v3
+          image: mayankramnani/todoflask-linux:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5050
