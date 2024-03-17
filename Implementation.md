@@ -18,7 +18,7 @@
 
 
 ## Part 3 - Deploy application on Minikube
-- Create [deployment.yaml] - Kubernetes deployment for the application that uses my todo flask and mongodb image from Dockerhub
+- Create [deployment.yml](deployment.yml) - Kubernetes deployment for the application that uses my todo flask and mongodb image from Dockerhub
 - Create NodePort service to expose the application externally
 - Run the application in a browser using minikube
 - ![img](images/3-minikube.jpg)
@@ -31,7 +31,7 @@
 - Install `gcloud` binary
 - Install kubectl plugins to talk to GKE: `gcloud components install gke-gcloud-auth-plugin`
 - Configure kubectl to talk to the right cluster: `gcloud container clusters get-credentials cloud-todo --region=us-east1`
-- Use the same [deployment.yaml](deployment.yaml) created above to create deployment in GKE cluster: `kubectl apply -f deployment.yaml`
+- Use the same [deployment.yml](deployment.yml) created above to create deployment in GKE cluster: `kubectl apply -f deployment.yaml`
 - Add ingress firewall rule to allow access from the internet using instructions in [link](https://cloud.google.com/kubernetes-engine/docs/how-to/exposing-apps#console_1)
 - Access application using a node's IP (`kubectl get nodes -o wide`) and configured NodePort
 - ![img](images/4-gke-browser.jpg)
