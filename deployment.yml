@@ -15,12 +15,32 @@ spec:
     spec:
       containers:
         - name: mytodo-app
-          image: mayankramnani/mytodoflask:latest
+          image: ag9489/mytodoflask:v3
+          imagePullPolicy: Always
           ports:
             - containerPort: 5050
           env:
             - name: MONGO_URI
               value: "mongodb://mongodb-service:27017/"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5050
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 5050
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 2
 
 ---
 apiVersion: v1
