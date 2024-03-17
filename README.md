@@ -16,6 +16,5 @@ A simple to-do web application using Flask, MongoDB, Docker and Kubernetes
 
 
 # Authors
-Mayank Ramnani
-Abhay Garg
-
+- [Mayank Ramnani](https://www.linkedin.com/in/mayank-ramnani/)
+- [Abhay Garg](http://linkedin.com/in/gargabhay06/)
