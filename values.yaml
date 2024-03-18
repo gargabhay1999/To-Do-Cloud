@@ -6,7 +6,7 @@ prometheus:
 alertmanager:
   config:
     global:
-      slack_api_url: https://hooks.slack.com/services/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
+      slack_api_url: <Slack-WebHook-URL>
   alertmanagerSpec:
     alertmanagerConfigNamespaceSelector:
     alertmanagerConfigSelector:
