@@ -23,6 +23,9 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-LICENSE
-README.md
-mongo_data
+**/values.yaml
+**/LICENSE
+**/README.md
+**/mongo_data
+**/Implementation.md
+**/images
