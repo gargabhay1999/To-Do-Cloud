@@ -3,6 +3,9 @@ from pymongo import MongoClient # Database connector
 from bson.objectid import ObjectId # For ObjectId to work
 from bson.errors import InvalidId # For catching InvalidId exception for ObjectId
 import os
+from prometheus_client import make_wsgi_app, Counter, Histogram, start_http_server, Gauge
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import time
 
 # mongodb_host = os.environ.get('MONGO_HOST', 'mongo')
 # mongodb_port = int(os.environ.get('MONGO_PORT', '27017'))
@@ -12,6 +15,29 @@ db = client.todo_app_db #Select the database
 todos = db.todo #Select the collection
 
 app = Flask(__name__)
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
+
+
+
+REQUEST_HEALTH_COUNT = Counter(
+    'app_request_health_count',
+    'Application Request Count',
+    ['method', 'endpoint', 'http_status']
+)
+REQUEST_HEALTH_LATENCY = Histogram(
+    'app_request_health_latency',
+    'Application Request Latency',
+    ['method', 'endpoint']
+)
+REQUEST_HEALTH_GAUGE = Gauge(
+    'app_request_health_gauge',
+	'Application Request Gauge',
+	['method', 'endpoint']
+)
+
+
 title = "Yout TaskList"
 heading = "Task List"
 #modify=ObjectId()
@@ -122,16 +148,21 @@ def about():
 
 @app.route("/health")
 def health ():
+    start_time = time.time()
+    REQUEST_HEALTH_COUNT.labels('GET', '/health', 200).inc()
+    REQUEST_HEALTH_GAUGE.labels('GET', '/health').set(1)
+    REQUEST_HEALTH_LATENCY.labels('GET', '/health').observe(time.time() - start_time)
+    
     return("TO-DO APP IS HEALTHY")
 
 @app.route("/ready")
 def ready ():
     return("TO-DO APP IS READY TO SERVE")
 
-# if __name__ == "__main__":
-# 	env = os.environ.get('FLASK_ENV', 'development')
-# 	port = int(os.environ.get('PORT', 5050))
-# 	debug = False if env == 'production' else True
-# 	app.run(debug=True)
-# 	app.run(port=port, debug=debug)
-# 	# Careful with the debug mode..
+if __name__ == "__main__":
+	env = os.environ.get('FLASK_ENV', 'development')
+	port = int(os.environ.get('PORT', 5050))
+	debug = False if env == 'production' else True
+	app.run(debug=True)
+	app.run(port=port, debug=debug)
+	# Careful with the debug mode..

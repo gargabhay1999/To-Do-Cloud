@@ -12,13 +12,15 @@ spec:
     metadata:
       labels:
         app: mytodo-app
+        monitoring: enabled
     spec:
       containers:
         - name: mytodo-app
-          image: ag9489/mytodoflask:v3
+          image: ag9489/mytodoflask:v4
           imagePullPolicy: Always
           ports:
             - containerPort: 5050
+              name: http-metrics
           env:
             - name: MONGO_URI
               value: "mongodb://mongodb-service:27017/"
@@ -47,6 +49,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mytodo-app-service
+  labels:
+    monitoring: enabled
 spec:
   type: NodePort
   selector:
@@ -56,7 +60,7 @@ spec:
       targetPort: 5050
       nodePort: 32227
       protocol: TCP
-      name: http
+      name: http-metrics
 
 ---
 apiVersion: apps/v1
@@ -92,3 +96,67 @@ spec:
       targetPort: 27017
       protocol: TCP
       name: mongodb
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: mytodo-podmonitor
+spec:
+  podMetricsEndpoints:
+    - path: metrics
+      port: http-metrics
+  selector:
+    matchLabels:
+      monitoring: enabled
+
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    release: kube-prometheus
+  name: mytodo-prometheus-rule
+spec:
+  groups:
+    - name: "mytodo-prometheus.rules"
+      rules:
+        - alert: PodIsDown
+          for: 30s
+          expr: sum(up{container="mytodo-app"}) < 4
+          labels:
+            severity: critical
+            app: mytodo-app
+          annotations:
+            # these annotations are going to be used in the alert that will be send to the slack/email/etc...
+            message: The deployment has less than 1 pod running.
+            summary: the current deployment "mytodo-app" need to have at least 2 replicas running
+            description: there seems to be a mismatch in the number of pod replicas between your alert configuration and the pod replicas
+
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: global-alert-manager-configuration
+  labels:
+    release: kube-prometheus
+spec:
+  receivers:
+    - name: slack-receiver
+      slackConfigs:
+        - channel: "#prometheus-bot"
+          sendResolved: true
+          iconEmoji: ":bell:"
+          text: "<!channel> \nsummary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}\nmessage: {{ .CommonAnnotations.message }}"
+  route:
+    matchers:
+      # name of the label to match
+      - name: app
+        value: mytodo-app
+        matchType: =
+    groupBy: ["job", "severity"]
+    groupWait: 30s
+    receiver: slack-receiver
+    groupInterval: 30s
+    repeatInterval: 30s
