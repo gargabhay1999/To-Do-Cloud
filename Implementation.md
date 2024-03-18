@@ -38,10 +38,19 @@
 
 
 ## Part 5 - Test Replication Controller 
+- In deployment.yml file, change the values of spec.replicas to scale up or down the number of desired pods
+- run `kubectl apply -f deployment.yml`
+- ![img](images/5-replica.png)
+
 
 ## Part 6 - Implement Rolling updates
+- In deployment.yml file, define livenessProbe and readinessProbe with these endpoints respectively. 
+- Set initialDelaySeconds (the delay in first probe), periodSeconds (frequency to perform probe) and failureThreshold (retry probe this many times, if retries also fail then restart the pod)
+- set rolling strategy `spec.strategy.type: RollingUpdate`
 
 ## Part 7 - Implement Health Monitoring
+- Create GET `/health` endpoint to check if the application is live
+- Create GET `/ready` endpoints to check if the application is receiving the traffic
 
 ## Part 8 - Implement Alerts using Prometheus and Slack
 
