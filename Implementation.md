@@ -89,9 +89,3 @@
 
 ---
 Implemented by Mayank Ramnani, Abhay Garg
-
-
-v4 - old image for rolling
-v5 - correct image
-v6 - no health
-v7 - no ready
