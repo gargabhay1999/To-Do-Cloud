@@ -71,7 +71,7 @@
 	helm install kube-prometheus prometheus-community/kube-prometheus-stack
 ```
 
-- In ![app.py](app/app.py) file, setup Prometheus client library which exposes metrics at the /metrics endpoint
+- In [app.py](app/app.py) file, setup Prometheus client library which exposes metrics at the /metrics endpoint
 - add monitoring labels to deployment and service in kubernetes in [deployment.yml](deployment.yml) file
 - With Kube-Prometheus, additional Custom Resource Definitions (CRDs) are installed, namely PodMonitor and ServiceMonitor. These CRDs inform the Prometheus operator which pods or services to monitor by scraping metrics.
 - These CRDs enable you to specify pods or services for monitoring based on certain labels within a defined namespace. Prometheus then picks up these configurations and begins monitoring.
