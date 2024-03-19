@@ -38,16 +38,16 @@
 
 
 ## Part 5 - Test Replication Controller 
-- In deployment.yml file, change the values of spec.replicas to scale up or down the number of desired pods
+- In [deployment.yml](deployment.yml) file, change the values of spec.replicas to scale up or down the number of desired pods
 - run `kubectl apply -f deployment.yml`
 - ![img](images/5-replica.png)
 
 
 ## Part 6 - Implement Rolling updates
-- In deployment.yml file, define livenessProbe and readinessProbe with these endpoints respectively. 
+- In [deployment.yml](deployment.yml) file, define livenessProbe and readinessProbe with these endpoints respectively. 
 - Set initialDelaySeconds (the delay in first probe), periodSeconds (frequency to perform probe) and failureThreshold (retry probe this many times, if retries also fail then restart the pod)
 - set rolling strategy `spec.strategy.type: RollingUpdate`
-- In the deployment.yml file, we specified maxSurge:0 and maxUnavailble:2. Means there will be 0 number of pod which will be created over the desired number of pods and 2 pods can be made unavailble in order to create 2 more pods with new config.
+- In the [deployment.yml](deployment.yml) file, we specified maxSurge:0 and maxUnavailble:2. Means there will be 0 number of pod which will be created over the desired number of pods and 2 pods can be made unavailble in order to create 2 more pods with new config.
 - ![img](images/6-rolling-updates.png)
 - We can list out all the revisions for this deployment `kubectl rollout history deployment/mytodo-app-deployment`
 - To rollback to the previous revision `kubectl rollout undo deployment/mytodo-app-deployment --to-revision=1`
@@ -60,10 +60,32 @@
 - `initialDelaySeconds: 5` (delay to the first probe after the container starts)
 - `periodSeconds: 5` (the probe frequency)
 - `failureThreshold: 2` (calls probe 2 times, after 2 fails, kubernetes restarts the pod)
-- ![img](images/7-liveness-probe-failure.png.png)
+- ![img](images/7-liveness-probe-failure.png)
 - ![img](images/7-readiness-probe-failure.png)
 
 ## Part 8 - Implement Alerts using Prometheus and Slack
+- Add the Prometheus community repository and install Kube-Prometheus
+```
+	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts 
+	helm repo update
+	helm install kube-prometheus prometheus-community/kube-prometheus-stack
+```
+
+- In ![app.py](app/app.py) file, setup Prometheus client library which exposes metrics at the /metrics endpoint
+- add monitoring labels to deployment and service in kubernetes in [deployment.yml](deployment.yml) file
+- With Kube-Prometheus, additional Custom Resource Definitions (CRDs) are installed, namely PodMonitor and ServiceMonitor. These CRDs inform the Prometheus operator which pods or services to monitor by scraping metrics.
+- These CRDs enable you to specify pods or services for monitoring based on certain labels within a defined namespace. Prometheus then picks up these configurations and begins monitoring.
+- create a new `PodMonitor` and specify which pods/services to monitor by matching the labels created earlier.
+- define custom prometheus rules to send alert using PrometheusRule in kubernetes in [deployment.yml](deployment.yml) file
+- For this app, we set `sum(up{container="mytodo-app"}) < 2`, means send alert if total number of pods is 2.
+- Specify slack webhook url in [values.yaml](values.yaml) file
+- Define Alertmanager configuration and set slackConfig, route, receivers, matchers, etc.
+- To test, scale down the pods to 1 `kubectl scale deployments.apps mytodo-app-deployment --replicas=1`
+- ![img](images/8-prometheus-alert.png)
+- ![img](images/8-prometheus-slack-alert.png)
+- ![img](images/8-alertmanager.png)
+
+- To setup prometheus, alert-manager and slack integration, follow this [medium-article](https://medium.com/@joudwawad/comprehensive-beginners-guide-to-kube-prometheus-in-kubernetes-monitoring-alerts-integration-4ade4fa8fa8c)
 
 ---
 Implemented by Mayank Ramnani, Abhay Garg
