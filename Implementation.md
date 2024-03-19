@@ -47,12 +47,29 @@
 - In deployment.yml file, define livenessProbe and readinessProbe with these endpoints respectively. 
 - Set initialDelaySeconds (the delay in first probe), periodSeconds (frequency to perform probe) and failureThreshold (retry probe this many times, if retries also fail then restart the pod)
 - set rolling strategy `spec.strategy.type: RollingUpdate`
+- In the deployment.yml file, we specified maxSurge:0 and maxUnavailble:2. Means there will be 0 number of pod which will be created over the desired number of pods and 2 pods can be made unavailble in order to create 2 more pods with new config.
+- ![img](6-rolling-updates.png)
+- We can list out all the revisions for this deployment `kubectl rollout history deployment/mytodo-app-deployment`
+- To rollback to the previous revision `kubectl rollout undo deployment/mytodo-app-deployment --to-revision=1`
+- ![img](6-rolling-updates-old-revision.png)
 
 ## Part 7 - Implement Health Monitoring
 - Create GET `/health` endpoint to check if the application is live
 - Create GET `/ready` endpoints to check if the application is receiving the traffic
+- Add configuration for liveness and readiness probes and set `httpGet` to above endpoints.
+- `initialDelaySeconds: 5` (delay to the first probe after the container starts)
+- `periodSeconds: 5` (the probe frequency)
+- `failureThreshold: 2` (calls probe 2 times, after 2 fails, kubernetes restarts the pod)
+- ![img](7-liveness-probe-failure.png.png)
+- ![img](7-readiness-probe-failure.png)
 
 ## Part 8 - Implement Alerts using Prometheus and Slack
 
 ---
 Implemented by Mayank Ramnani, Abhay Garg
+
+
+v4 - old image for rolling
+v5 - correct image
+v6 - no health
+v7 - no ready
